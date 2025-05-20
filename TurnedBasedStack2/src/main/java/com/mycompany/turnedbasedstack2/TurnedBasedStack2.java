@@ -26,7 +26,11 @@ public class TurnedBasedStack2 {
         Stack<Integer> desperateGambitStack = new Stack<>();
         boolean desperateGambitActive = false;
         boolean desperateGambitNerf = false;
-        boolean desperateGambitUsed = false; 
+        boolean desperateGambitUsed = false;
+
+        // Jingu Mastery variables
+        Stack<Integer> jinguBuffStack = new Stack<>(); // Stack for Jingu buff turns
+        int jinguHitCounter = 0; // Counts normal attacks for Jingu trigger
 
         System.out.println("YOU ENCOUNTERED AN ENEMY!");
 
@@ -48,10 +52,10 @@ public class TurnedBasedStack2 {
 
             // -------- Player's Turn --------
             System.out.println("PLAYER'S TURN!");
-            System.out.println(" 1. Normal Attack");
-            System.out.println(" 2. Thons 3 ");
-            System.out.println(" 3. Stun Attack");
-            System.out.println(" 4. Skip Turn");
+            System.out.println("1. Normal Attack");
+            System.out.println("2. Stun Attack");
+            System.out.println("3. ");
+            System.out.println("3. Skip Turn");
             System.out.print("Choose (or type exit): ");
 
             String input = scanner.next();
@@ -62,7 +66,29 @@ public class TurnedBasedStack2 {
             }
 
             if (input.equals("1")) {
+                jinguHitCounter++;
                 int playerDmg = playerMinDmg + random.nextInt(playerMaxDmg - playerMinDmg + 1);
+
+                // Check if Jingu Mastery activates
+                if (jinguBuffStack.isEmpty() && jinguHitCounter == 4) {
+                    System.out.println("Passive Jingu Mastery is activated!");
+                    System.out.println("Jingu Mastery activated! Next 4 normal attacks gain +4 damage and 80% lifesteal!");
+                    // Push 4 stacks for next 4 attacks
+                    for (int i = 0; i < 4; i++) {
+                        jinguBuffStack.push(1);
+                    }
+                    jinguHitCounter = 0; // Reset hit counter
+                }
+
+                // If Jingu Mastery is active, apply buff and pop stack
+                if (!jinguBuffStack.isEmpty()) {
+                    playerDmg += 4;
+                    int lifesteal = (int)Math.round(playerDmg * 0.80);
+                    playerHp += lifesteal;
+                    System.out.println("Jingu Mastery buff: +4 damage and +" + lifesteal + " HP (lifesteal)!");
+                    jinguBuffStack.pop();
+                }
+
                 System.out.println("You dealt " + playerDmg + " damage to the monster.");
                 monsterHpStack.push(monsterHp);
                 monsterHp = monsterHp - playerDmg;
@@ -90,10 +116,8 @@ public class TurnedBasedStack2 {
                         break;
                     }
                 }
-                else if (input.equals("2")){
-                    
-                }
-            } else if (input.equals("3")) {
+            } else if (input.equals("2")) {
+                jinguHitCounter = 0; // Missed streak, reset Jingu counter
                 int stunChance = random.nextInt(4); 
                 if (stunChance == 0) {
                     monsterStunned = true;
@@ -102,7 +126,8 @@ public class TurnedBasedStack2 {
                     System.out.println("Stun failed! The monster is not stunned.");
                 }
                 System.out.println();
-            } else if (input.equals("4")) {
+            } else if (input.equals("3")) {
+                jinguHitCounter = 0; // Missed streak, reset Jingu counter
                 System.out.println("You skipped your turn!");
                 System.out.println();
             } else {
